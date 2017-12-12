@@ -44,7 +44,6 @@ from server.block_processor import BlockProcessor
 import server.daemon as daemon
 from server.session import ElectrumX, DashElectrumX
 
-
 Block = namedtuple("Block", "raw header transactions")
 OP_RETURN = OpCodes.OP_RETURN
 
@@ -82,7 +81,7 @@ class Coin(object):
         req_attrs = ['TX_COUNT', 'TX_COUNT_HEIGHT', 'TX_PER_BLOCK']
         for coin in util.subclasses(Coin):
             if (coin.NAME.lower() == name.lower() and
-                    coin.NET.lower() == net.lower()):
+                        coin.NET.lower() == net.lower()):
                 coin_req_attrs = req_attrs.copy()
                 missing = [attr for attr in coin_req_attrs
                            if not hasattr(coin, attr)]
@@ -315,7 +314,7 @@ class AuxPowMixin(object):
 
 class EquihashMixin(object):
     STATIC_BLOCK_HEADERS = False
-    BASIC_HEADER_SIZE = 140 # Excluding Equihash solution
+    BASIC_HEADER_SIZE = 140  # Excluding Equihash solution
     DESERIALIZER = lib_tx.DeserializerEquihash
 
     @classmethod
@@ -341,7 +340,6 @@ class EquihashMixin(object):
 
 
 class ScryptMixin(object):
-
     DESERIALIZER = lib_tx.DeserializerTxTime
     HEADER_HASH = None
 
@@ -530,7 +528,7 @@ class BitcoinSegwitRegtest(BitcoinSegwitTestnet):
     NET = "regtest"
     GENESIS_HASH = ('0f9188f13cb7b2c71f2a335e3a4fc328'
                     'bf5beb436012afca590b1a11466e2206')
-    PEERS= []
+    PEERS = []
     TX_COUNT = 1
     TX_COUNT_HEIGHT = 1
 
@@ -600,7 +598,7 @@ class LitecoinTestnet(Litecoin):
 
 
 class Viacoin(AuxPowMixin, Coin):
-    NAME="Viacoin"
+    NAME = "Viacoin"
     SHORTNAME = "VIA"
     NET = "mainnet"
     P2PKH_VERBYTE = bytes.fromhex("47")
@@ -866,6 +864,7 @@ class Zcash(EquihashMixin, Coin):
     RPC_PORT = 8232
     REORG_LIMIT = 800
 
+
 class Hush(EquihashMixin, Coin):
     NAME = "Hush"
     SHORTNAME = "HUSH"
@@ -873,14 +872,15 @@ class Hush(EquihashMixin, Coin):
     P2PKH_VERBYTE = bytes.fromhex("1CB8")
     P2SH_VERBYTES = [bytes.fromhex("1CBD")]
     WIF_BYTE = bytes.fromhex("80")
-    GENESIS_HASH         = ( '0003a67bc26fe564b75daf11186d3606'
-                          '52eb435a35ba3d9d3e7e5d5f8e62dc17')
+    GENESIS_HASH = ('0003a67bc26fe564b75daf11186d3606'
+                    '52eb435a35ba3d9d3e7e5d5f8e62dc17')
     DESERIALIZER = lib_tx.DeserializerZcash
     TX_COUNT = 329196
     TX_COUNT_HEIGHT = 68379
     TX_PER_BLOCK = 5
     RPC_PORT = 8822
     REORG_LIMIT = 800
+
 
 class Komodo(KomodoMixin, EquihashMixin, Coin):
     NAME = "Komodo"
@@ -892,6 +892,7 @@ class Komodo(KomodoMixin, EquihashMixin, Coin):
     RPC_PORT = 7771
     REORG_LIMIT = 800
     PEERS = []
+
 
 class Monaize(KomodoMixin, EquihashMixin, Coin):
     NAME = "Monaize"
@@ -1038,6 +1039,7 @@ class Monacoin(Coin):
         'electrumx2.movsign.info t',
         'electrum-mona.bitbank.cc s t',
     ]
+
 
 class MonacoinTestnet(Monacoin):
     SHORTNAME = "XMN"
@@ -1217,3 +1219,26 @@ class Chips(Coin):
     REORG_LIMIT = 800
 
 
+class Innovacoin(Coin):
+    NAME = "Innovacoin"
+    SHORTNAME = "INN"
+    NET = "mainnet"
+    P2PKH_VERBYTE = bytes.fromhex("66")  # Address starts with i
+    P2SH_VERBYTES = [bytes.fromhex("14")]
+    WIF_BYTE = bytes.fromhex("C3")  # WIF - Wallet Information Format
+    GENESIS_HASH = ('000003841e9ad6096539e5a6a0c3a0d3'
+                    'a3f71b96da0c1ecf744052e6ee3cc2cd')
+    # DESERIALIZER = lib_tx.DeserializerTxTime
+    DAEMON = daemon.DashDaemon
+    TX_COUNT = 1000  # gettxoutsetinfo
+    TX_COUNT_HEIGHT = 10000
+    TX_PER_BLOCK = 1
+    RPC_PORT = 14519
+    REORG_LIMIT = 1000
+    PEERS = []
+
+    @classmethod
+    def header_hash(cls, header):
+        '''Given a header return the hash.'''
+        import neoscrypt
+        return neoscrypt.getPoWHash(header)
